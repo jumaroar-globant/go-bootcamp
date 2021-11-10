@@ -49,14 +49,14 @@ func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 		return ErrMissingPassword
 	}
 
-	sql := "INSERT INTO users VALUES($1, $2, $3, $4, $5)"
+	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES($1, $2, $3, $4, $5)"
 
-	_, err := r.db.ExecContext(ctx, sql, user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation)
+	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation)
 	if err != nil {
 		return err
 	}
 
-	parentsSQL := "INSERT INTO user_parents VALUES($1, $2)"
+	parentsSQL := "INSERT INTO user_parents (user_id, name) VALUES($1, $2)"
 
 	for _, parent := range user.Parents {
 		_, err := r.db.ExecContext(ctx, parentsSQL, user.ID, parent)

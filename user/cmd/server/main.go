@@ -25,7 +25,13 @@ func main() {
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	userRepository := repository.NewUserRepository(config.Db, logger)
+	db, err := config.Connect()
+	if err != nil {
+		level.Error(logger).Log("error_connecting_to_database", err)
+		return
+	}
+
+	userRepository := repository.NewUserRepository(db, logger)
 	userService := service.NewUserService(userRepository, logger)
 	userEndpoints := endpoints.MakeEndpoints(userService)
 	grpcServer := transport.NewGRPCServer(userEndpoints, logger)
