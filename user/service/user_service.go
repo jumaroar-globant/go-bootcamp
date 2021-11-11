@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/jumaroar-globant/go-bootcamp/user/pb"
@@ -14,6 +15,12 @@ import (
 
 const (
 	userDeletedString = "user deleted successfully"
+)
+
+var (
+	ErrMissingUserName = errors.New("missing username")
+	ErrMissingPassword = errors.New("missing password")
+	ErrMissingUserID   = errors.New("missing user id")
 )
 
 type userService struct {
@@ -54,6 +61,14 @@ func (s *userService) Authenticate(ctx context.Context, authenticationRequest *p
 func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
+	if createUserRequest.Name == "" {
+		return nil, ErrMissingUserName
+	}
+
+	if createUserRequest.Password == "" {
+		return nil, ErrMissingPassword
+	}
+
 	age, err := strconv.Atoi(createUserRequest.Age)
 	if err != nil {
 		level.Error(logger).Log("error_converting_age_to_integer", err)
@@ -90,6 +105,10 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
+	if updateUserRequest.Id == "" {
+		return nil, ErrMissingUserID
+	}
+
 	age, err := strconv.Atoi(updateUserRequest.Age)
 	if err != nil {
 		level.Error(logger).Log("error_converting_age_to_integer", err)
@@ -118,6 +137,10 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
+	if getUserRequest.Id == "" {
+		return nil, ErrMissingUserID
+	}
+
 	user, err := s.repository.GetUser(ctx, getUserRequest.Id)
 	if err != nil {
 		level.Error(logger).Log("error_updating_user_in_database", err)
@@ -130,6 +153,10 @@ func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserReq
 
 func (s *userService) DeleteUser(ctx context.Context, deleteUserRequest *pb.DeleteUserRequest) (string, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
+
+	if deleteUserRequest.Id == "" {
+		return "", ErrMissingUserID
+	}
 
 	err := s.repository.DeleteUser(ctx, deleteUserRequest.Id)
 	if err != nil {

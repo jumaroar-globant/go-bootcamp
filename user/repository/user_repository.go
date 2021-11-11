@@ -9,10 +9,7 @@ import (
 )
 
 var (
-	ErrMissingUserName = errors.New("missing username")
-	ErrMissingPassword = errors.New("missing password")
-	ErrMissingUserID   = errors.New("missing user id")
-	ErrUserNotFound    = errors.New("user not found")
+	ErrUserNotFound = errors.New("user not found")
 )
 
 type UserRepository interface {
@@ -41,14 +38,6 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 }
 
 func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
-	if user.Name == "" {
-		return ErrMissingUserName
-	}
-
-	if user.PasswordHash == "" {
-		return ErrMissingPassword
-	}
-
 	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES($1, $2, $3, $4, $5)"
 
 	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation)
@@ -69,10 +58,6 @@ func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
-	if user.Name == "" {
-		return ErrMissingUserName
-	}
-
 	sql := "UPDATE users SET name=$1, age=$2, additional_information=$3  WHERE id = $4"
 
 	_, err := r.db.ExecContext(ctx, sql, user.Name, user.Age, user.AdditionalInformation, user.ID)
@@ -81,10 +66,6 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
 }
 
 func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, error) {
-	if userID == "" {
-		return nil, ErrMissingUserID
-	}
-
 	sqlString := "SELECT * FROM users WHERE id=?"
 
 	user := &User{}
@@ -115,10 +96,6 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, err
 }
 
 func (r *userRepository) DeleteUser(ctx context.Context, userID string) error {
-	if userID == "" {
-		return ErrMissingUserID
-	}
-
 	parentsSQLString := "DELETE FROM user_parents WHERE user_id=$1"
 
 	_, err := r.db.ExecContext(ctx, parentsSQLString, userID)
