@@ -14,6 +14,7 @@ var (
 	ErrWrongPassword = errors.New("wrong password")
 )
 
+// UserRepository defines a user repository
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) error
 	CreateUser(ctx context.Context, user *User) error
@@ -27,6 +28,7 @@ type userRepository struct {
 	logger log.Logger
 }
 
+//NewUserRepository is the UserRepository constructor
 func NewUserRepository(db *sql.DB, logger log.Logger) UserRepository {
 	return &userRepository{
 		db:     db,
@@ -34,6 +36,7 @@ func NewUserRepository(db *sql.DB, logger log.Logger) UserRepository {
 	}
 }
 
+// Authenticate is the userRepository method to authenticate a user
 func (r *userRepository) Authenticate(ctx context.Context, username string, password string) error {
 	userSQL := "SELECT password_hash FROM users WHERE name=?"
 
@@ -60,6 +63,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 	return nil
 }
 
+// CreateUser is the userRepository method to create a user
 func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)"
 
@@ -80,6 +84,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 	return err
 }
 
+// UpdateUser is the userRepository method to update a user
 func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
 	sql := "UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?"
 
@@ -88,6 +93,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
 	return err
 }
 
+// GetUser is the userRepository method to get a user
 func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, error) {
 	sqlString := "SELECT * FROM users WHERE id=?"
 
@@ -118,6 +124,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, err
 	return user, rows.Err()
 }
 
+// DeleteUser is the userRepository method to delete a user
 func (r *userRepository) DeleteUser(ctx context.Context, userID string) error {
 	parentsSQLString := "DELETE FROM user_parents WHERE user_id=?"
 

@@ -11,11 +11,13 @@ const (
 	_attemptsToReadRandomData = 2
 )
 
+// HashPassword is a function to has a password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
+// CheckPasswordHash is a function to compare a hash to a password string
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil

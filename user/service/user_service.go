@@ -45,6 +45,7 @@ func NewUserService(userRep repository.UserRepository, logger log.Logger) UserSe
 	}
 }
 
+// Authenticate is the userService method to authenticate
 func (s *userService) Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (string, error) {
 	logger := log.With(s.logger, "method", "Authenticate")
 
@@ -58,6 +59,7 @@ func (s *userService) Authenticate(ctx context.Context, authenticationRequest *p
 	return "User authenticated!", nil
 }
 
+// CreateUser is the userService method to create a user
 func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
@@ -102,6 +104,7 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 	return user, nil
 }
 
+// UpdateUser is the userService method to update a user
 func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
@@ -134,6 +137,7 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 	return user, nil
 }
 
+// GetUser is the userService method to get a user
 func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*repository.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
@@ -151,6 +155,7 @@ func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserReq
 	return user, nil
 }
 
+// DeleteUser is the userService method to delete a user
 func (s *userService) DeleteUser(ctx context.Context, deleteUserRequest *pb.DeleteUserRequest) (string, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 

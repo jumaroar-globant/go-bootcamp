@@ -9,6 +9,7 @@ import (
 	"github.com/jumaroar-globant/go-bootcamp/user/service"
 )
 
+// UserEndpoints are the user endpoints
 type UserEndpoints struct {
 	Authenticate endpoint.Endpoint
 	CreateUser   endpoint.Endpoint

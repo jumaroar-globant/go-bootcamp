@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	dbDriver   = shared.GetStringEnvVar("DATABASE_DRIVER", "")
+	dbDriver   = shared.GetStringEnvVar("DATABASE_DRIVER", "mysql")
 	dbUsername = shared.GetStringEnvVar("DATABASE_USERNAME", "root")
 	dbPassword = shared.GetStringEnvVar("DATABASE_PASSWORD", "")
 	dbIP       = shared.GetStringEnvVar("DATABASE_IP", "127.0.0.1")
@@ -17,6 +17,7 @@ var (
 	dbName     = shared.GetStringEnvVar("DATABASE_NAME", "bootcamp")
 )
 
+// Connect is a function to connect to the database
 func Connect() (*sql.DB, error) {
 	dbConnString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbIP, dbPort, dbName)
 

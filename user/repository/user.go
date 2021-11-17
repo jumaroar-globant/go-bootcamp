@@ -1,5 +1,6 @@
 package repository
 
+// User is the user type
 type User struct {
 	ID                    string
 	PasswordHash          string
@@ -9,6 +10,7 @@ type User struct {
 	Parents               []string
 }
 
+// Parent is the parent type
 type Parent struct {
 	UserID string
 	Name   string

@@ -52,6 +52,7 @@ func NewGRPCServer(endpoints endpoints.UserEndpoints, logger log.Logger) pb.User
 	}
 }
 
+// Authenticate is the gRPCServer method to authenticate
 func (s *gRPCServer) Authenticate(ctx context.Context, req *pb.UserAuthRequest) (*pb.UserAuthResponse, error) {
 	_, resp, err := s.authenticate.ServeGRPC(ctx, req)
 	if err != nil {
@@ -60,6 +61,7 @@ func (s *gRPCServer) Authenticate(ctx context.Context, req *pb.UserAuthRequest) 
 	return resp.(*pb.UserAuthResponse), nil
 }
 
+// CreateUser is the gRPCServer method to create a user
 func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	_, resp, err := s.createUser.ServeGRPC(ctx, req)
 	if err != nil {
@@ -68,6 +70,7 @@ func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 	return resp.(*pb.CreateUserResponse), nil
 }
 
+// GetUser is the gRPCServer method to get a user
 func (s *gRPCServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	_, resp, err := s.createUser.ServeGRPC(ctx, req)
 	if err != nil {
@@ -76,6 +79,7 @@ func (s *gRPCServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.G
 	return resp.(*pb.GetUserResponse), nil
 }
 
+// UpdateUser is the gRPCServer method to update a user
 func (s *gRPCServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	_, resp, err := s.createUser.ServeGRPC(ctx, req)
 	if err != nil {
@@ -84,6 +88,7 @@ func (s *gRPCServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) 
 	return resp.(*pb.UpdateUserResponse), nil
 }
 
+// DeleteUser is the gRPCServer method to delete a user
 func (s *gRPCServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
 	_, resp, err := s.createUser.ServeGRPC(ctx, req)
 	if err != nil {
