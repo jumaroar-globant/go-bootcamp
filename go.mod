@@ -7,6 +7,7 @@ require (
 	github.com/go-kit/kit v0.12.0
 	github.com/go-kit/log v0.2.0
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	google.golang.org/grpc v1.40.0
