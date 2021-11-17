@@ -42,7 +42,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 
 	user := &User{}
 
-	err := r.db.QueryRowContext(ctx, userSQL, password).Scan(&user.PasswordHash)
+	err := r.db.QueryRowContext(ctx, userSQL, username).Scan(&user.PasswordHash)
 	if err == sql.ErrNoRows {
 		return ErrUserNotFound
 	}
@@ -51,12 +51,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 		return err
 	}
 
-	passwordHash, err := shared.HashPassword(password)
-	if err != nil {
-		return err
-	}
-
-	if passwordHash != user.PasswordHash {
+	if shared.CheckPasswordHash(password, user.PasswordHash) {
 		return ErrWrongPassword
 	}
 
