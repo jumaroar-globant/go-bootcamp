@@ -28,10 +28,10 @@ func TestCreateUser(t *testing.T) {
 		Parents:               []string{"John Doe", "Jane Doe"},
 	}
 
-	sqlString := regexp.QuoteMeta(`INSERT INTO users (id, name, password_hash, age, additional_information) VALUES($1, $2, $3, $4, $5)`)
+	sqlString := regexp.QuoteMeta(`INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)`)
 	mock.ExpectExec(sqlString).WithArgs(user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentSSQLString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES($1, $2)`)
+	parentSSQLString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
 	mock.ExpectExec(parentSSQLString).WithArgs(user.ID, user.Parents[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentSSQLString).WithArgs(user.ID, user.Parents[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 

@@ -35,7 +35,7 @@ func NewUserRepository(db *sql.DB, logger log.Logger) UserRepository {
 }
 
 func (r *userRepository) Authenticate(ctx context.Context, username string, password string) error {
-	userSQL := "SELECT password_hash FROM users WHERE name=$1"
+	userSQL := "SELECT password_hash FROM users WHERE name=?"
 
 	user := &User{}
 
@@ -61,14 +61,14 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 }
 
 func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
-	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES($1, $2, $3, $4, $5)"
+	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)"
 
 	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation)
 	if err != nil {
 		return err
 	}
 
-	parentsSQL := "INSERT INTO user_parents (user_id, name) VALUES($1, $2)"
+	parentsSQL := "INSERT INTO user_parents (user_id, name) VALUES(?, ?)"
 
 	for _, parent := range user.Parents {
 		_, err := r.db.ExecContext(ctx, parentsSQL, user.ID, parent)
@@ -81,7 +81,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
-	sql := "UPDATE users SET name=$1, age=$2, additional_information=$3  WHERE id = $4"
+	sql := "UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, user.Name, user.Age, user.AdditionalInformation, user.ID)
 
@@ -98,7 +98,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, err
 		return nil, ErrUserNotFound
 	}
 
-	parentsSQLString := "SELECT name FROM user_parents WHERE user_id=$1"
+	parentsSQLString := "SELECT name FROM user_parents WHERE user_id=?"
 
 	rows, err := r.db.QueryContext(ctx, parentsSQLString, userID)
 	if err != nil {
@@ -119,14 +119,14 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, err
 }
 
 func (r *userRepository) DeleteUser(ctx context.Context, userID string) error {
-	parentsSQLString := "DELETE FROM user_parents WHERE user_id=$1"
+	parentsSQLString := "DELETE FROM user_parents WHERE user_id=?"
 
 	_, err := r.db.ExecContext(ctx, parentsSQLString, userID)
 	if err != nil {
 		return err
 	}
 
-	sqlString := "DELETE FROM users WHERE id=$1"
+	sqlString := "DELETE FROM users WHERE id=?"
 
 	_, err = r.db.ExecContext(ctx, sqlString, userID)
 	if err != nil {
