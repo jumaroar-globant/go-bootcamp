@@ -9,6 +9,8 @@ import (
 	"github.com/jumaroar-globant/go-bootcamp/user/repository"
 	"github.com/jumaroar-globant/go-bootcamp/user/shared"
 
+	sharedLib "github.com/jumaroar-globant/go-bootcamp/shared"
+
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 )
@@ -31,9 +33,9 @@ type userService struct {
 // UserService interface describes a user service
 type UserService interface {
 	Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (string, error)
-	CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (*repository.User, error)
-	UpdateUser(context.Context, *pb.UpdateUserRequest) (*repository.User, error)
-	GetUser(context.Context, *pb.GetUserRequest) (*repository.User, error)
+	CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (*sharedLib.User, error)
+	UpdateUser(context.Context, *pb.UpdateUserRequest) (*sharedLib.User, error)
+	GetUser(context.Context, *pb.GetUserRequest) (*sharedLib.User, error)
 	DeleteUser(context.Context, *pb.DeleteUserRequest) (string, error)
 }
 
@@ -85,10 +87,10 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 		return nil, err
 	}
 
-	user := &repository.User{
+	user := &sharedLib.User{
 		ID:                    shared.GenerateID("USR"),
 		Name:                  createUserRequest.Name,
-		PasswordHash:          passwordHash,
+		Password:              passwordHash,
 		Age:                   age,
 		AdditionalInformation: createUserRequest.AdditionalInformation,
 		Parents:               createUserRequest.Parent,
@@ -119,7 +121,7 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 		return nil, err
 	}
 
-	user := &repository.User{
+	user := &sharedLib.User{
 		ID:                    updateUserRequest.Id,
 		Name:                  updateUserRequest.Name,
 		Age:                   age,

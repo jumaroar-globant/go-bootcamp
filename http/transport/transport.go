@@ -11,6 +11,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	userendpoints "github.com/jumaroar-globant/go-bootcamp/http/endpoints/user"
+	"github.com/jumaroar-globant/go-bootcamp/shared"
 )
 
 // NewHTTPServer generates a new HTTPServer with its endpoints
@@ -23,7 +24,16 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.Authenticate,
 			decodeAuthRequest,
 			encodeAuthResponse,
-		))
+		),
+	)
+
+	r.Methods("POST").Path("/user").Handler(
+		httptransport.NewServer(
+			usrEndpoints.CreateUser,
+			decodeCreateUserRequest,
+			encodeCreateUserResponse,
+		),
+	)
 
 	return r
 }
@@ -46,5 +56,19 @@ func decodeAuthRequest(_ context.Context, r *http.Request) (request interface{},
 func encodeAuthResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	res := response.(userendpoints.AuthenticationResponse)
+	return json.NewEncoder(w).Encode(res)
+}
+
+func decodeCreateUserRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req shared.User
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+		return nil, e
+	}
+	return req, nil
+}
+
+func encodeCreateUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	res := response.(*shared.User)
 	return json.NewEncoder(w).Encode(res)
 }

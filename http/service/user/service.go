@@ -7,11 +7,13 @@ import (
 	"github.com/go-kit/log/level"
 
 	userrepository "github.com/jumaroar-globant/go-bootcamp/http/repository/user"
+	"github.com/jumaroar-globant/go-bootcamp/shared"
 )
 
 // Service is the user service
 type Service interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
+	CreateUser(ctx context.Context, user *shared.User) (*shared.User, error)
 }
 
 type userService struct {
@@ -31,11 +33,23 @@ func NewService(repository userrepository.UserRepository, logger log.Logger) Ser
 func (s *userService) Authenticate(ctx context.Context, name string, password string) (string, error) {
 	logger := log.With(s.logger, "method", "Authenticate")
 
-	userId, err := s.repository.Authenticate(ctx, name, password)
+	message, err := s.repository.Authenticate(ctx, name, password)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return "", err
 	}
 
-	return userId, nil
+	return message, nil
+}
+
+func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
+	logger := log.With(s.logger, "method", "Authenticate")
+
+	userCreated, err := s.repository.CreateUser(ctx, user)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
+
+	return userCreated, nil
 }

@@ -2,13 +2,21 @@ package userrepository
 
 import (
 	"context"
+	"errors"
+	"strconv"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 
 	"github.com/jumaroar-globant/go-bootcamp/user/pb"
 
+	sharedLib "github.com/jumaroar-globant/go-bootcamp/shared"
+
 	"google.golang.org/grpc"
+)
+
+var (
+	ErrBadAge = errors.New("age is not a number")
 )
 
 type userRepository struct {
@@ -19,6 +27,7 @@ type userRepository struct {
 // UserRepository is the user repository
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
+	CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
 }
 
 // NewUserRepository is the UserRepository constructor
@@ -47,4 +56,38 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pwdH
 	}
 
 	return reply.Message, nil
+}
+
+func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
+	logger := log.With(r.logger, "method", "Authenticate")
+
+	request := &pb.CreateUserRequest{
+		Name:                  user.Name,
+		Password:              user.Password,
+		Age:                   strconv.Itoa(user.Age),
+		AdditionalInformation: user.AdditionalInformation,
+		Parent:                user.Parents,
+	}
+
+	client := pb.NewUserServiceClient(r.conn)
+
+	reply, err := client.CreateUser(ctx, request)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
+
+	intAge, err := strconv.Atoi(reply.Age)
+	if err != nil {
+		level.Error(logger).Log("err", ErrBadAge)
+		return nil, ErrBadAge
+	}
+
+	return &sharedLib.User{
+		ID:                    reply.Id,
+		Name:                  reply.Name,
+		Age:                   intAge,
+		AdditionalInformation: reply.AdditionalInformation,
+		Parents:               reply.Parent,
+	}, nil
 }

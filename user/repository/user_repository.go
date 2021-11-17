@@ -6,6 +6,8 @@ import (
 	"errors"
 
 	"github.com/go-kit/log"
+
+	sharedLib "github.com/jumaroar-globant/go-bootcamp/shared"
 	"github.com/jumaroar-globant/go-bootcamp/user/shared"
 )
 
@@ -17,9 +19,9 @@ var (
 // UserRepository defines a user repository
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) error
-	CreateUser(ctx context.Context, user *User) error
-	UpdateUser(ctx context.Context, user *User) error
-	GetUser(ctx context.Context, userID string) (*User, error)
+	CreateUser(ctx context.Context, user *sharedLib.User) error
+	UpdateUser(ctx context.Context, user *sharedLib.User) error
+	GetUser(ctx context.Context, userID string) (*sharedLib.User, error)
 	DeleteUser(ctx context.Context, userID string) error
 }
 
@@ -40,9 +42,9 @@ func NewUserRepository(db *sql.DB, logger log.Logger) UserRepository {
 func (r *userRepository) Authenticate(ctx context.Context, username string, password string) error {
 	userSQL := "SELECT password_hash FROM users WHERE name=?"
 
-	user := &User{}
+	user := &sharedLib.User{}
 
-	err := r.db.QueryRowContext(ctx, userSQL, username).Scan(&user.PasswordHash)
+	err := r.db.QueryRowContext(ctx, userSQL, username).Scan(&user.Password)
 	if err == sql.ErrNoRows {
 		return ErrUserNotFound
 	}
@@ -51,7 +53,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 		return err
 	}
 
-	if shared.CheckPasswordHash(password, user.PasswordHash) {
+	if shared.CheckPasswordHash(password, user.Password) {
 		return ErrWrongPassword
 	}
 
@@ -62,7 +64,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)"
 
-	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.PasswordHash, user.Age, user.AdditionalInformation)
+	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.Password, user.Age, user.AdditionalInformation)
 	if err != nil {
 		return err
 	}
@@ -92,7 +94,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
 func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, error) {
 	sqlString := "SELECT * FROM users WHERE id=?"
 
-	user := &User{}
+	user := &sharedLib.User{}
 
 	err := r.db.QueryRowContext(ctx, sqlString, userID).Scan(user)
 	if err == sql.ErrNoRows {
@@ -108,7 +110,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, err
 	defer rows.Close()
 
 	for rows.Next() {
-		var parent Parent
+		var parent sharedLib.Parent
 		if err := rows.Scan(&parent.UserID, &parent.Name); err != nil {
 			return user, err
 		}

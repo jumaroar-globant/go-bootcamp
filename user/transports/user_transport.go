@@ -9,7 +9,8 @@ import (
 
 	"github.com/jumaroar-globant/go-bootcamp/user/endpoints"
 	"github.com/jumaroar-globant/go-bootcamp/user/pb"
-	"github.com/jumaroar-globant/go-bootcamp/user/repository"
+
+	sharedLib "github.com/jumaroar-globant/go-bootcamp/shared"
 )
 
 type gRPCServer struct {
@@ -102,7 +103,7 @@ func decodeCreateUserRequest(_ context.Context, request interface{}) (interface{
 }
 
 func encodeCreateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(repository.User)
+	resp := response.(*sharedLib.User)
 
 	return &pb.CreateUserResponse{
 		Id:                    resp.ID,
@@ -129,7 +130,7 @@ func decodeGetUserRequest(_ context.Context, request interface{}) (interface{}, 
 }
 
 func encodeGetUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(repository.User)
+	resp := response.(sharedLib.User)
 
 	return &pb.GetUserResponse{
 		Id:                    resp.ID,
@@ -145,7 +146,7 @@ func decodeUpdateUserRequest(_ context.Context, request interface{}) (interface{
 }
 
 func encodeUpdateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(repository.User)
+	resp := response.(sharedLib.User)
 
 	return &pb.UpdateUserResponse{
 		Id:                    resp.ID,
