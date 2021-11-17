@@ -31,39 +31,34 @@ func MakeEndpoints(s service.UserService) UserEndpoints {
 func makeCreateUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*pb.CreateUserRequest)
-		result, _ := s.CreateUser(ctx, req)
-		return result, nil
+		return s.CreateUser(ctx, req)
 	}
 }
 
 func makeAuthenticateEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*pb.UserAuthRequest)
-		result, _ := s.Authenticate(ctx, req)
-		return result, nil
+		return s.Authenticate(ctx, req)
 	}
 }
 
 func makeGetUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*pb.GetUserRequest)
-		result, _ := s.GetUser(ctx, req)
-		return result, nil
+		return s.GetUser(ctx, req)
 	}
 }
 
 func makeUpdateUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*pb.UpdateUserRequest)
-		result, _ := s.UpdateUser(ctx, req)
-		return result, nil
+		return s.UpdateUser(ctx, req)
 	}
 }
 
 func makeDeleteUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*pb.DeleteUserRequest)
-		result, _ := s.DeleteUser(ctx, req)
-		return result, nil
+		return s.DeleteUser(ctx, req)
 	}
 }

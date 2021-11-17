@@ -113,7 +113,10 @@ func decodeAuthenticateRequest(_ context.Context, request interface{}) (interfac
 }
 
 func encodeAuthenticateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return response, nil
+	resp := response.(string)
+	return &pb.UserAuthResponse{
+		Message: resp,
+	}, nil
 }
 
 func decodeGetUserRequest(_ context.Context, request interface{}) (interface{}, error) {

@@ -6,10 +6,12 @@ import (
 	"errors"
 
 	"github.com/go-kit/log"
+	"github.com/jumaroar-globant/go-bootcamp/user/shared"
 )
 
 var (
-	ErrUserNotFound = errors.New("user not found")
+	ErrUserNotFound  = errors.New("user not found")
+	ErrWrongPassword = errors.New("wrong password")
 )
 
 type UserRepository interface {
@@ -33,6 +35,27 @@ func NewUserRepository(db *sql.DB, logger log.Logger) UserRepository {
 }
 
 func (r *userRepository) Authenticate(ctx context.Context, username string, password string) error {
+	userSQL := "SELECT password_hash FROM users WHERE name=$1"
+
+	user := &User{}
+
+	err := r.db.QueryRowContext(ctx, userSQL, password).Scan(&user.PasswordHash)
+	if err == sql.ErrNoRows {
+		return ErrUserNotFound
+	}
+
+	if err != nil {
+		return err
+	}
+
+	passwordHash, err := shared.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	if passwordHash != user.PasswordHash {
+		return ErrWrongPassword
+	}
 
 	return nil
 }

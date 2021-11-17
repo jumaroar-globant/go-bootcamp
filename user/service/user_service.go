@@ -30,7 +30,7 @@ type userService struct {
 
 // UserService interface describes a user service
 type UserService interface {
-	Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (*pb.UserAuthResponse, error)
+	Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (string, error)
 	CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (*repository.User, error)
 	UpdateUser(context.Context, *pb.UpdateUserRequest) (*repository.User, error)
 	GetUser(context.Context, *pb.GetUserRequest) (*repository.User, error)
@@ -45,17 +45,17 @@ func NewUserService(userRep repository.UserRepository, logger log.Logger) UserSe
 	}
 }
 
-func (s *userService) Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (*pb.UserAuthResponse, error) {
+func (s *userService) Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (string, error) {
 	logger := log.With(s.logger, "method", "Authenticate")
 
 	err := s.repository.Authenticate(ctx, authenticationRequest.Username, authenticationRequest.Password)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 
-		return nil, err
+		return "", err
 	}
 
-	return &pb.UserAuthResponse{}, nil
+	return "User authenticated!", nil
 }
 
 func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*repository.User, error) {
