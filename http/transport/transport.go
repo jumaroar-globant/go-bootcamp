@@ -13,6 +13,7 @@ import (
 	userendpoints "github.com/jumaroar-globant/go-bootcamp/http/endpoints/user"
 )
 
+// NewHTTPServer generates a new HTTPServer with its endpoints
 func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 	r.Use(commonMiddleware)

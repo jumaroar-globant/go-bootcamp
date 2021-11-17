@@ -16,10 +16,12 @@ type userRepository struct {
 	logger log.Logger
 }
 
+// UserRepository is the user repository
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
 }
 
+// NewUserRepository is the UserRepository constructor
 func NewUserRepository(conn *grpc.ClientConn, logger log.Logger) UserRepository {
 	return &userRepository{
 		conn:   conn,
@@ -27,6 +29,7 @@ func NewUserRepository(conn *grpc.ClientConn, logger log.Logger) UserRepository 
 	}
 }
 
+// Authenticate is the userRepository authentication method
 func (r *userRepository) Authenticate(ctx context.Context, username string, pwdHash string) (string, error) {
 	logger := log.With(r.logger, "method", "Authenticate")
 

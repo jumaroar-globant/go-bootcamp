@@ -7,19 +7,23 @@ import (
 	userservice "github.com/jumaroar-globant/go-bootcamp/http/service/user"
 )
 
+//UserEndpoints are the user endpoints
 type UserEndpoints struct {
 	Authenticate endpoint.Endpoint
 }
 
+//AuthenticationRequest is the authentication request
 type AuthenticationRequest struct {
 	Username string
 	Password string
 }
 
+//AuthenticationResponse is the authentication response
 type AuthenticationResponse struct {
 	Message string
 }
 
+//MakeEndpoints creates the user endpoints
 func MakeEndpoints(s userservice.Service) *UserEndpoints {
 	return &UserEndpoints{
 		Authenticate: makeAuthenticationEndpoint(s),
