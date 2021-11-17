@@ -42,6 +42,7 @@ func (s *userService) Authenticate(ctx context.Context, name string, password st
 	return message, nil
 }
 
+//Authenticate is a method to create a user
 func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
 	logger := log.With(s.logger, "method", "Authenticate")
 

@@ -62,7 +62,7 @@ func (s *userService) Authenticate(ctx context.Context, authenticationRequest *p
 }
 
 // CreateUser is the userService method to create a user
-func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*repository.User, error) {
+func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	if createUserRequest.Name == "" {
@@ -107,7 +107,7 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 }
 
 // UpdateUser is the userService method to update a user
-func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*repository.User, error) {
+func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	if updateUserRequest.Id == "" {
@@ -140,7 +140,7 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 }
 
 // GetUser is the userService method to get a user
-func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*repository.User, error) {
+func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	if getUserRequest.Id == "" {

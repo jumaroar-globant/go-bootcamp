@@ -61,7 +61,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 }
 
 // CreateUser is the userRepository method to create a user
-func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
+func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) error {
 	userSQL := "INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)"
 
 	_, err := r.db.ExecContext(ctx, userSQL, user.ID, user.Name, user.Password, user.Age, user.AdditionalInformation)
@@ -82,7 +82,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *User) error {
 }
 
 // UpdateUser is the userRepository method to update a user
-func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
+func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) error {
 	sql := "UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, user.Name, user.Age, user.AdditionalInformation, user.ID)
@@ -91,7 +91,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *User) error {
 }
 
 // GetUser is the userRepository method to get a user
-func (r *userRepository) GetUser(ctx context.Context, userID string) (*User, error) {
+func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib.User, error) {
 	sqlString := "SELECT * FROM users WHERE id=?"
 
 	user := &sharedLib.User{}

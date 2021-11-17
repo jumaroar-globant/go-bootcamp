@@ -58,6 +58,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pwdH
 	return reply.Message, nil
 }
 
+// CreateUser is the userRepository user creation method
 func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
 	logger := log.With(r.logger, "method", "Authenticate")
 
