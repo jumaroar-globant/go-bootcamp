@@ -53,7 +53,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pass
 		return err
 	}
 
-	if shared.CheckPasswordHash(password, user.Password) {
+	if !shared.CheckPasswordHash(password, user.Password) {
 		return ErrWrongPassword
 	}
 
@@ -92,11 +92,11 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) e
 
 // GetUser is the userRepository method to get a user
 func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib.User, error) {
-	sqlString := "SELECT * FROM users WHERE id=?"
+	sqlString := "SELECT id, name, age, additional_information FROM users WHERE id=?"
 
 	user := &sharedLib.User{}
 
-	err := r.db.QueryRowContext(ctx, sqlString, userID).Scan(user)
+	err := r.db.QueryRowContext(ctx, sqlString, userID).Scan(&user.ID, &user.Name, &user.Age, &user.AdditionalInformation)
 	if err == sql.ErrNoRows {
 		return nil, ErrUserNotFound
 	}
@@ -111,7 +111,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 
 	for rows.Next() {
 		var parent sharedLib.Parent
-		if err := rows.Scan(&parent.UserID, &parent.Name); err != nil {
+		if err := rows.Scan(&parent.Name); err != nil {
 			return user, err
 		}
 

@@ -108,7 +108,7 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 
 // UpdateUser is the userService method to update a user
 func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*sharedLib.User, error) {
-	logger := log.With(s.logger, "method", "CreateUser")
+	logger := log.With(s.logger, "method", "UpdateUser")
 
 	if updateUserRequest.Id == "" {
 		return nil, ErrMissingUserID
@@ -141,7 +141,7 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 
 // GetUser is the userService method to get a user
 func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*sharedLib.User, error) {
-	logger := log.With(s.logger, "method", "CreateUser")
+	logger := log.With(s.logger, "method", "GetUser")
 
 	if getUserRequest.Id == "" {
 		return nil, ErrMissingUserID
@@ -149,7 +149,7 @@ func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserReq
 
 	user, err := s.repository.GetUser(ctx, getUserRequest.Id)
 	if err != nil {
-		level.Error(logger).Log("error_updating_user_in_database", err)
+		level.Error(logger).Log("error_getting_user_from_database", err)
 
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserReq
 
 // DeleteUser is the userService method to delete a user
 func (s *userService) DeleteUser(ctx context.Context, deleteUserRequest *pb.DeleteUserRequest) (string, error) {
-	logger := log.With(s.logger, "method", "CreateUser")
+	logger := log.With(s.logger, "method", "DeleteUser")
 
 	if deleteUserRequest.Id == "" {
 		return "", ErrMissingUserID
@@ -167,7 +167,7 @@ func (s *userService) DeleteUser(ctx context.Context, deleteUserRequest *pb.Dele
 
 	err := s.repository.DeleteUser(ctx, deleteUserRequest.Id)
 	if err != nil {
-		level.Error(logger).Log("error_updating_user_in_database", err)
+		level.Error(logger).Log("error_deleting_user_from_database", err)
 
 		return "", err
 	}

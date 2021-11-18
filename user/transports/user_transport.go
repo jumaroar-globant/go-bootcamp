@@ -73,7 +73,7 @@ func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 
 // GetUser is the gRPCServer method to get a user
 func (s *gRPCServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	_, resp, err := s.createUser.ServeGRPC(ctx, req)
+	_, resp, err := s.getUser.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (s *gRPCServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.G
 
 // UpdateUser is the gRPCServer method to update a user
 func (s *gRPCServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
-	_, resp, err := s.createUser.ServeGRPC(ctx, req)
+	_, resp, err := s.updateUser.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (s *gRPCServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) 
 
 // DeleteUser is the gRPCServer method to delete a user
 func (s *gRPCServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
-	_, resp, err := s.createUser.ServeGRPC(ctx, req)
+	_, resp, err := s.deleteUser.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func decodeGetUserRequest(_ context.Context, request interface{}) (interface{}, 
 }
 
 func encodeGetUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(sharedLib.User)
+	resp := response.(*sharedLib.User)
 
 	return &pb.GetUserResponse{
 		Id:                    resp.ID,
@@ -142,11 +142,11 @@ func encodeGetUserResponse(_ context.Context, response interface{}) (interface{}
 }
 
 func decodeUpdateUserRequest(_ context.Context, request interface{}) (interface{}, error) {
-	return request.(*pb.GetUserRequest), nil
+	return request.(*pb.UpdateUserRequest), nil
 }
 
 func encodeUpdateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(sharedLib.User)
+	resp := response.(*sharedLib.User)
 
 	return &pb.UpdateUserResponse{
 		Id:                    resp.ID,
@@ -158,7 +158,7 @@ func encodeUpdateUserResponse(_ context.Context, response interface{}) (interfac
 }
 
 func decodeDeleteUserRequest(_ context.Context, request interface{}) (interface{}, error) {
-	return request.(*pb.GetUserRequest), nil
+	return request.(*pb.DeleteUserRequest), nil
 }
 
 func encodeDeleteUserResponse(_ context.Context, response interface{}) (interface{}, error) {

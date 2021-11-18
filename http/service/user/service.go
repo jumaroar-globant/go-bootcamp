@@ -14,6 +14,7 @@ import (
 type Service interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
 	CreateUser(ctx context.Context, user *shared.User) (*shared.User, error)
+	GetUser(ctx context.Context, userID string) (*shared.User, error)
 }
 
 type userService struct {
@@ -42,7 +43,7 @@ func (s *userService) Authenticate(ctx context.Context, name string, password st
 	return message, nil
 }
 
-//Authenticate is a method to create a user
+//CreateUser is a method to create a user
 func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
 	logger := log.With(s.logger, "method", "Authenticate")
 
@@ -53,4 +54,17 @@ func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*share
 	}
 
 	return userCreated, nil
+}
+
+//GetUser is a method to get a user by id
+func (s *userService) GetUser(ctx context.Context, userID string) (*shared.User, error) {
+	logger := log.With(s.logger, "method", "Authenticate")
+
+	user, err := s.repository.GetUser(ctx, userID)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
+
+	return user, nil
 }

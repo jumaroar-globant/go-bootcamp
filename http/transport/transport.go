@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-kit/log"
@@ -12,6 +13,10 @@ import (
 
 	userendpoints "github.com/jumaroar-globant/go-bootcamp/http/endpoints/user"
 	"github.com/jumaroar-globant/go-bootcamp/shared"
+)
+
+var (
+	ErrMissingUserID = errors.New("missing user id")
 )
 
 // NewHTTPServer generates a new HTTPServer with its endpoints
@@ -32,6 +37,14 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.CreateUser,
 			decodeCreateUserRequest,
 			encodeCreateUserResponse,
+		),
+	)
+
+	r.Methods("GET").Path("/user/{id}").Handler(
+		httptransport.NewServer(
+			usrEndpoints.GetUser,
+			decodeGetUserRequest,
+			encodeGetUserResponse,
 		),
 	)
 
@@ -68,6 +81,25 @@ func decodeCreateUserRequest(_ context.Context, r *http.Request) (request interf
 }
 
 func encodeCreateUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	res := response.(*shared.User)
+	return json.NewEncoder(w).Encode(res)
+}
+
+func decodeGetUserRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req userendpoints.GetUserRequest
+
+	userID := mux.Vars(r)["id"]
+	if userID == "" {
+		return nil, ErrMissingUserID
+	}
+
+	req.UserID = userID
+
+	return req, nil
+}
+
+func encodeGetUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	res := response.(*shared.User)
 	return json.NewEncoder(w).Encode(res)
