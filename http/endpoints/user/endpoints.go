@@ -14,6 +14,7 @@ type UserEndpoints struct {
 	CreateUser   endpoint.Endpoint
 	GetUser      endpoint.Endpoint
 	UpdateUser   endpoint.Endpoint
+	DeleteUser   endpoint.Endpoint
 }
 
 //AuthenticationRequest is the authentication request
@@ -32,6 +33,16 @@ type GetUserRequest struct {
 	UserID string
 }
 
+//DeleteUserRequest is the delete user request
+type DeleteUserRequest struct {
+	UserID string
+}
+
+//DeleteUserResponse is the delete user response
+type DeleteUserResponse struct {
+	Message string
+}
+
 //MakeEndpoints creates the user endpoints
 func MakeEndpoints(s userservice.Service) *UserEndpoints {
 	return &UserEndpoints{
@@ -39,6 +50,7 @@ func MakeEndpoints(s userservice.Service) *UserEndpoints {
 		CreateUser:   makeCreateUserEndpoint(s),
 		GetUser:      makeGetUserEndpoint(s),
 		UpdateUser:   makeUpdateUserEndpoint(s),
+		DeleteUser:   makeDeleteUserEndpoint(s),
 	}
 }
 
@@ -70,5 +82,15 @@ func makeUpdateUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(shared.User)
 		return s.UpdateUser(ctx, &req)
+	}
+}
+
+func makeDeleteUserEndpoint(s userservice.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(DeleteUserRequest)
+		message, err := s.DeleteUser(ctx, req.UserID)
+		return DeleteUserResponse{
+			Message: message,
+		}, err
 	}
 }

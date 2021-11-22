@@ -56,6 +56,14 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 		),
 	)
 
+	r.Methods("DELETE").Path("/user/{id}").Handler(
+		httptransport.NewServer(
+			usrEndpoints.DeleteUser,
+			decodeDeleteUserRequest,
+			encodeDeleteUserResponse,
+		),
+	)
+
 	return r
 }
 
@@ -127,5 +135,24 @@ func decodeUpdateUserRequest(_ context.Context, r *http.Request) (request interf
 func encodeUpdateUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	res := response.(*shared.User)
+	return json.NewEncoder(w).Encode(res)
+}
+
+func decodeDeleteUserRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req userendpoints.DeleteUserRequest
+
+	userID := mux.Vars(r)["id"]
+	if userID == "" {
+		return nil, ErrMissingUserID
+	}
+
+	req.UserID = userID
+
+	return req, nil
+}
+
+func encodeDeleteUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	res := response.(userendpoints.DeleteUserResponse)
 	return json.NewEncoder(w).Encode(res)
 }

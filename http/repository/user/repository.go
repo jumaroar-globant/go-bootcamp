@@ -30,6 +30,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
 	GetUser(ctx context.Context, userID string) (*sharedLib.User, error)
 	UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
+	DeleteUser(ctx context.Context, userID string) (string, error)
 }
 
 // NewUserRepository is the UserRepository constructor
@@ -159,4 +160,23 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (
 		AdditionalInformation: reply.AdditionalInformation,
 		Parents:               reply.Parent,
 	}, nil
+}
+
+// DeleteUser is the userRepository method to delete an user by id
+func (r *userRepository) DeleteUser(ctx context.Context, userID string) (string, error) {
+	logger := log.With(r.logger, "method", "DeleteUser")
+
+	request := &pb.DeleteUserRequest{
+		Id: userID,
+	}
+
+	client := pb.NewUserServiceClient(r.conn)
+
+	reply, err := client.DeleteUser(ctx, request)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return "", err
+	}
+
+	return reply.Message, nil
 }

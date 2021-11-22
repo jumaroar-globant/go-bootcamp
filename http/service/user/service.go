@@ -16,6 +16,7 @@ type Service interface {
 	CreateUser(ctx context.Context, user *shared.User) (*shared.User, error)
 	GetUser(ctx context.Context, userID string) (*shared.User, error)
 	UpdateUser(ctx context.Context, user *shared.User) (*shared.User, error)
+	DeleteUser(ctx context.Context, userID string) (string, error)
 }
 
 type userService struct {
@@ -81,4 +82,17 @@ func (s *userService) UpdateUser(ctx context.Context, user *shared.User) (*share
 	}
 
 	return userCreated, nil
+}
+
+//DeleteUser is a method to delete a user
+func (s *userService) DeleteUser(ctx context.Context, userID string) (string, error) {
+	logger := log.With(s.logger, "method", "DeleteUser")
+
+	message, err := s.repository.DeleteUser(ctx, userID)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return "", err
+	}
+
+	return message, nil
 }
