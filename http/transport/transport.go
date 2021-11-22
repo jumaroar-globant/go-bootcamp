@@ -48,6 +48,14 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 		),
 	)
 
+	r.Methods("POST").Path("/user/{id}").Handler(
+		httptransport.NewServer(
+			usrEndpoints.UpdateUser,
+			decodeUpdateUserRequest,
+			encodeUpdateUserResponse,
+		),
+	)
+
 	return r
 }
 
@@ -100,6 +108,23 @@ func decodeGetUserRequest(_ context.Context, r *http.Request) (request interface
 }
 
 func encodeGetUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	res := response.(*shared.User)
+	return json.NewEncoder(w).Encode(res)
+}
+
+func decodeUpdateUserRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req shared.User
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+		return nil, e
+	}
+
+	req.ID = mux.Vars(r)["id"]
+
+	return req, nil
+}
+
+func encodeUpdateUserResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	res := response.(*shared.User)
 	return json.NewEncoder(w).Encode(res)

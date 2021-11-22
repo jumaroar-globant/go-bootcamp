@@ -13,6 +13,7 @@ type UserEndpoints struct {
 	Authenticate endpoint.Endpoint
 	CreateUser   endpoint.Endpoint
 	GetUser      endpoint.Endpoint
+	UpdateUser   endpoint.Endpoint
 }
 
 //AuthenticationRequest is the authentication request
@@ -37,6 +38,7 @@ func MakeEndpoints(s userservice.Service) *UserEndpoints {
 		Authenticate: makeAuthenticationEndpoint(s),
 		CreateUser:   makeCreateUserEndpoint(s),
 		GetUser:      makeGetUserEndpoint(s),
+		UpdateUser:   makeUpdateUserEndpoint(s),
 	}
 }
 
@@ -61,5 +63,12 @@ func makeGetUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(GetUserRequest)
 		return s.GetUser(ctx, req.UserID)
+	}
+}
+
+func makeUpdateUserEndpoint(s userservice.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(shared.User)
+		return s.UpdateUser(ctx, &req)
 	}
 }

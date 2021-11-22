@@ -29,6 +29,7 @@ type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
 	CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
 	GetUser(ctx context.Context, userID string) (*sharedLib.User, error)
+	UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
 }
 
 // NewUserRepository is the UserRepository constructor
@@ -105,6 +106,41 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 	client := pb.NewUserServiceClient(r.conn)
 
 	reply, err := client.GetUser(ctx, request)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
+
+	intAge, err := strconv.Atoi(reply.Age)
+	if err != nil {
+		level.Error(logger).Log("err", ErrBadAge)
+		return nil, ErrBadAge
+	}
+
+	return &sharedLib.User{
+		ID:                    reply.Id,
+		Name:                  reply.Name,
+		Age:                   intAge,
+		AdditionalInformation: reply.AdditionalInformation,
+		Parents:               reply.Parent,
+	}, nil
+}
+
+// UpdateUser is the userRepository method to update an user
+func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
+	logger := log.With(r.logger, "method", "UpdateUser")
+
+	request := &pb.UpdateUserRequest{
+		Id:                    user.ID,
+		Name:                  user.Name,
+		Age:                   strconv.Itoa(user.Age),
+		AdditionalInformation: user.AdditionalInformation,
+		Parent:                user.Parents,
+	}
+
+	client := pb.NewUserServiceClient(r.conn)
+
+	reply, err := client.UpdateUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return nil, err

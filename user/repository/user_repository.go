@@ -20,7 +20,7 @@ var (
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) error
 	CreateUser(ctx context.Context, user *sharedLib.User) error
-	UpdateUser(ctx context.Context, user *sharedLib.User) error
+	UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
 	GetUser(ctx context.Context, userID string) (*sharedLib.User, error)
 	DeleteUser(ctx context.Context, userID string) error
 }
@@ -82,12 +82,31 @@ func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) e
 }
 
 // UpdateUser is the userRepository method to update a user
-func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) error {
+func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
 	sql := "UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, user.Name, user.Age, user.AdditionalInformation, user.ID)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	parentsDeleteSQL := "DELETE FROM user_parents WHERE user_id=?"
+
+	_, err = r.db.ExecContext(ctx, parentsDeleteSQL, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	parentsInsertSQL := "INSERT INTO user_parents (user_id, name) VALUES(?, ?)"
+
+	for _, parent := range user.Parents {
+		_, err := r.db.ExecContext(ctx, parentsInsertSQL, user.ID, parent)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return r.GetUser(ctx, user.ID)
 }
 
 // GetUser is the userRepository method to get a user

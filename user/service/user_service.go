@@ -129,14 +129,14 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 		Parents:               updateUserRequest.Parent,
 	}
 
-	err = s.repository.UpdateUser(ctx, user)
+	updatedUser, err := s.repository.UpdateUser(ctx, user)
 	if err != nil {
 		level.Error(logger).Log("error_updating_user_in_database", err)
 
 		return nil, err
 	}
 
-	return user, nil
+	return updatedUser, nil
 }
 
 // GetUser is the userService method to get a user

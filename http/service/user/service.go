@@ -15,6 +15,7 @@ type Service interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
 	CreateUser(ctx context.Context, user *shared.User) (*shared.User, error)
 	GetUser(ctx context.Context, userID string) (*shared.User, error)
+	UpdateUser(ctx context.Context, user *shared.User) (*shared.User, error)
 }
 
 type userService struct {
@@ -45,7 +46,7 @@ func (s *userService) Authenticate(ctx context.Context, name string, password st
 
 //CreateUser is a method to create a user
 func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
-	logger := log.With(s.logger, "method", "Authenticate")
+	logger := log.With(s.logger, "method", "CreateUser")
 
 	userCreated, err := s.repository.CreateUser(ctx, user)
 	if err != nil {
@@ -58,7 +59,7 @@ func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*share
 
 //GetUser is a method to get a user by id
 func (s *userService) GetUser(ctx context.Context, userID string) (*shared.User, error) {
-	logger := log.With(s.logger, "method", "Authenticate")
+	logger := log.With(s.logger, "method", "GetUser")
 
 	user, err := s.repository.GetUser(ctx, userID)
 	if err != nil {
@@ -67,4 +68,17 @@ func (s *userService) GetUser(ctx context.Context, userID string) (*shared.User,
 	}
 
 	return user, nil
+}
+
+//Update is a method to update a user
+func (s *userService) UpdateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
+	logger := log.With(s.logger, "method", "UpdateUser")
+
+	userCreated, err := s.repository.UpdateUser(ctx, user)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
+
+	return userCreated, nil
 }
