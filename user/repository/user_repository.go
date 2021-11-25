@@ -120,6 +120,10 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 		return nil, ErrUserNotFound
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
 	parentsSQLString := "SELECT name FROM user_parents WHERE user_id=?"
 
 	rows, err := r.db.QueryContext(ctx, parentsSQLString, userID)
