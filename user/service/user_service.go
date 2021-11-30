@@ -33,9 +33,9 @@ type userService struct {
 // UserService interface describes a user service
 type UserService interface {
 	Authenticate(ctx context.Context, authenticationRequest *pb.UserAuthRequest) (string, error)
-	CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (*sharedLib.User, error)
-	UpdateUser(context.Context, *pb.UpdateUserRequest) (*sharedLib.User, error)
-	GetUser(context.Context, *pb.GetUserRequest) (*sharedLib.User, error)
+	CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (sharedLib.User, error)
+	UpdateUser(context.Context, *pb.UpdateUserRequest) (sharedLib.User, error)
+	GetUser(context.Context, *pb.GetUserRequest) (sharedLib.User, error)
 	DeleteUser(context.Context, *pb.DeleteUserRequest) (string, error)
 }
 
@@ -62,32 +62,32 @@ func (s *userService) Authenticate(ctx context.Context, authenticationRequest *p
 }
 
 // CreateUser is the userService method to create a user
-func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (*sharedLib.User, error) {
+func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.CreateUserRequest) (sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	if createUserRequest.Name == "" {
-		return nil, ErrMissingUserName
+		return sharedLib.User{}, ErrMissingUserName
 	}
 
 	if createUserRequest.Password == "" {
-		return nil, ErrMissingPassword
+		return sharedLib.User{}, ErrMissingPassword
 	}
 
 	age, err := strconv.Atoi(createUserRequest.Age)
 	if err != nil {
 		level.Error(logger).Log("error_converting_age_to_integer", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	passwordHash, err := shared.HashPassword(createUserRequest.Password)
 	if err != nil {
 		level.Error(logger).Log("error_hashing_password", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
-	user := &sharedLib.User{
+	user := sharedLib.User{
 		ID:                    shared.GenerateID("USR"),
 		Name:                  createUserRequest.Name,
 		Password:              passwordHash,
@@ -100,28 +100,28 @@ func (s *userService) CreateUser(ctx context.Context, createUserRequest *pb.Crea
 	if err != nil {
 		level.Error(logger).Log("error_creating_user_in_database", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	return user, nil
 }
 
 // UpdateUser is the userService method to update a user
-func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (*sharedLib.User, error) {
+func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.UpdateUserRequest) (sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "UpdateUser")
 
 	if updateUserRequest.Id == "" {
-		return nil, ErrMissingUserID
+		return sharedLib.User{}, ErrMissingUserID
 	}
 
 	age, err := strconv.Atoi(updateUserRequest.Age)
 	if err != nil {
 		level.Error(logger).Log("error_converting_age_to_integer", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
-	user := &sharedLib.User{
+	user := sharedLib.User{
 		ID:                    updateUserRequest.Id,
 		Name:                  updateUserRequest.Name,
 		Age:                   age,
@@ -133,25 +133,25 @@ func (s *userService) UpdateUser(ctx context.Context, updateUserRequest *pb.Upda
 	if err != nil {
 		level.Error(logger).Log("error_updating_user_in_database", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	return updatedUser, nil
 }
 
 // GetUser is the userService method to get a user
-func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (*sharedLib.User, error) {
+func (s *userService) GetUser(ctx context.Context, getUserRequest *pb.GetUserRequest) (sharedLib.User, error) {
 	logger := log.With(s.logger, "method", "GetUser")
 
 	if getUserRequest.Id == "" {
-		return nil, ErrMissingUserID
+		return sharedLib.User{}, ErrMissingUserID
 	}
 
 	user, err := s.repository.GetUser(ctx, getUserRequest.Id)
 	if err != nil {
 		level.Error(logger).Log("error_getting_user_from_database", err)
 
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	return user, nil

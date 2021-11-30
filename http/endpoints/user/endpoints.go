@@ -2,10 +2,15 @@ package userendpoints
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/endpoint"
 	userservice "github.com/jumaroar-globant/go-bootcamp/http/service/user"
 	"github.com/jumaroar-globant/go-bootcamp/shared"
+)
+
+var (
+	errBadRequest = errors.New("bad request")
 )
 
 //UserEndpoints are the user endpoints
@@ -56,8 +61,13 @@ func MakeEndpoints(s userservice.Service) *UserEndpoints {
 
 func makeAuthenticationEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(AuthenticationRequest)
+		req, ok := request.(AuthenticationRequest)
+		if !ok {
+			return nil, errBadRequest
+		}
+
 		message, err := s.Authenticate(ctx, req.Username, req.Password)
+
 		return AuthenticationResponse{
 			Message: message,
 		}, err
@@ -66,29 +76,46 @@ func makeAuthenticationEndpoint(s userservice.Service) endpoint.Endpoint {
 
 func makeCreateUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(shared.User)
-		return s.CreateUser(ctx, &req)
+		req, ok := request.(shared.User)
+		if !ok {
+			return nil, errBadRequest
+		}
+
+		return s.CreateUser(ctx, req)
 	}
 }
 
 func makeGetUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(GetUserRequest)
+		req, ok := request.(GetUserRequest)
+		if !ok {
+			return nil, errBadRequest
+		}
+
 		return s.GetUser(ctx, req.UserID)
 	}
 }
 
 func makeUpdateUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(shared.User)
-		return s.UpdateUser(ctx, &req)
+		req, ok := request.(shared.User)
+		if !ok {
+			return nil, errBadRequest
+		}
+
+		return s.UpdateUser(ctx, req)
 	}
 }
 
 func makeDeleteUserEndpoint(s userservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(DeleteUserRequest)
+		req, ok := request.(DeleteUserRequest)
+		if !ok {
+			return nil, errBadRequest
+		}
+
 		message, err := s.DeleteUser(ctx, req.UserID)
+
 		return DeleteUserResponse{
 			Message: message,
 		}, err

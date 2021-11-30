@@ -19,13 +19,13 @@ func TestAuthenticate(t *testing.T) {
 	c.NoError(err)
 	c.Equal("User Authenticated!", result)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	_, err = service.Authenticate(context.Background(), "test", "test")
-	c.Equal(ErrForcedFailure, err)
+	c.Equal(errForcedFailure, err)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -33,17 +33,17 @@ func TestCreateUser(t *testing.T) {
 
 	service := NewService(&repoMock{}, log.NewJSONLogger(os.Stdout))
 
-	result, err := service.CreateUser(context.Background(), &shared.User{Name: "test"})
+	result, err := service.CreateUser(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
 	c.Equal("USR123", result.ID)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
-	_, err = service.CreateUser(context.Background(), &shared.User{Name: "test"})
-	c.Equal(ErrForcedFailure, err)
+	_, err = service.CreateUser(context.Background(), shared.User{Name: "test"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestGetUser(t *testing.T) {
@@ -55,13 +55,13 @@ func TestGetUser(t *testing.T) {
 	c.NoError(err)
 	c.Equal("USR123", result.ID)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	_, err = service.GetUser(context.Background(), "USR123")
-	c.Equal(ErrForcedFailure, err)
+	c.Equal(errForcedFailure, err)
 }
 
 func TestUpdateuser(t *testing.T) {
@@ -69,17 +69,17 @@ func TestUpdateuser(t *testing.T) {
 
 	service := NewService(&repoMock{}, log.NewJSONLogger(os.Stdout))
 
-	result, err := service.UpdateUser(context.Background(), &shared.User{Name: "test"})
+	result, err := service.UpdateUser(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
 	c.Equal("USR123", result.ID)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
-	_, err = service.UpdateUser(context.Background(), &shared.User{Name: "test"})
-	c.Equal(ErrForcedFailure, err)
+	_, err = service.UpdateUser(context.Background(), shared.User{Name: "test"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestDeleteUser(t *testing.T) {
@@ -91,11 +91,11 @@ func TestDeleteUser(t *testing.T) {
 	c.NoError(err)
 	c.Equal("user deleted successfully", result)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	_, err = service.DeleteUser(context.Background(), "USR123")
-	c.Equal(ErrForcedFailure, err)
+	c.Equal(errForcedFailure, err)
 }

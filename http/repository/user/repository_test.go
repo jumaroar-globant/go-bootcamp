@@ -18,9 +18,9 @@ func TestAuthenticate(t *testing.T) {
 	c.NoError(err)
 	c.Equal("User Authenticated!", authResponse)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	authResponse, err = repo.Authenticate(context.Background(), "test", "testPassWord")
@@ -34,27 +34,27 @@ func TestCreateUser(t *testing.T) {
 	repo, err := InitGRPCMock()
 	c.Nil(err)
 
-	createResponse, err := repo.CreateUser(context.Background(), &shared.User{Name: "test"})
+	createResponse, err := repo.CreateUser(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
 	c.Equal("USR123", createResponse.ID)
 	c.Equal("test", createResponse.Name)
 
-	ForceBadAge = true
+	forceBadAge = true
 	defer func() {
-		ForceBadAge = false
+		forceBadAge = false
 	}()
 
-	createResponse, err = repo.CreateUser(context.Background(), &shared.User{Name: "test"})
-	c.Nil(createResponse)
+	createResponse, err = repo.CreateUser(context.Background(), shared.User{Name: "test"})
+	c.Empty(createResponse)
 	c.Error(err, "rpc error: code = Unknown desc = age is not a number")
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
-	createResponse, err = repo.CreateUser(context.Background(), &shared.User{Name: "test"})
-	c.Nil(createResponse)
+	createResponse, err = repo.CreateUser(context.Background(), shared.User{Name: "test"})
+	c.Empty(createResponse)
 	c.Error(err, "rpc error: code = Unknown desc = forced failure")
 }
 
@@ -69,22 +69,22 @@ func TestGetUser(t *testing.T) {
 	c.Equal("USR123", getResponse.ID)
 	c.Equal("test", getResponse.Name)
 
-	ForceBadAge = true
+	forceBadAge = true
 	defer func() {
-		ForceBadAge = false
+		forceBadAge = false
 	}()
 
 	getResponse, err = repo.GetUser(context.Background(), "USR123")
-	c.Nil(getResponse)
+	c.Empty(getResponse)
 	c.Error(err, "rpc error: code = Unknown desc = age is not a number")
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	getResponse, err = repo.GetUser(context.Background(), "USR123")
-	c.Nil(getResponse)
+	c.Empty(getResponse)
 	c.Error(err, "rpc error: code = Unknown desc = forced failure")
 }
 
@@ -94,27 +94,27 @@ func TestUpdateUser(t *testing.T) {
 	repo, err := InitGRPCMock()
 	c.Nil(err)
 
-	updateResponse, err := repo.UpdateUser(context.Background(), &shared.User{Name: "test"})
+	updateResponse, err := repo.UpdateUser(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
 	c.Equal("USR123", updateResponse.ID)
 	c.Equal("test", updateResponse.Name)
 
-	ForceBadAge = true
+	forceBadAge = true
 	defer func() {
-		ForceBadAge = false
+		forceBadAge = false
 	}()
 
-	updateResponse, err = repo.UpdateUser(context.Background(), &shared.User{Name: "test"})
-	c.Nil(updateResponse)
+	updateResponse, err = repo.UpdateUser(context.Background(), shared.User{Name: "test"})
+	c.Empty(updateResponse)
 	c.Error(err, "rpc error: code = Unknown desc = age is not a number")
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
-	updateResponse, err = repo.UpdateUser(context.Background(), &shared.User{Name: "test"})
-	c.Nil(updateResponse)
+	updateResponse, err = repo.UpdateUser(context.Background(), shared.User{Name: "test"})
+	c.Empty(updateResponse)
 	c.Error(err, "rpc error: code = Unknown desc = forced failure")
 }
 
@@ -128,9 +128,9 @@ func TestDeleteUser(t *testing.T) {
 	c.NoError(err)
 	c.Equal("user deleted successfully", deleteResponse)
 
-	ForceMockFail = true
+	forceMockFail = true
 	defer func() {
-		ForceMockFail = false
+		forceMockFail = false
 	}()
 
 	deleteResponse, err = repo.DeleteUser(context.Background(), "USR123")

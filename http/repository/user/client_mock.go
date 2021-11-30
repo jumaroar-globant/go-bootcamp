@@ -15,12 +15,9 @@ import (
 )
 
 var (
-	// ErrForcedFailure is an error for a forced failure
-	ErrForcedFailure = errors.New("forced failure")
-	// ForceMockFail is a variable to fail a mock
-	ForceMockFail = false
-	// ForceBadAge is a variable to return an invalid age
-	ForceBadAge = false
+	errForcedFailure = errors.New("forced failure")
+	forceMockFail    = false
+	forceBadAge      = false
 )
 
 type grpcMock struct {
@@ -68,8 +65,8 @@ func InitGRPCMock() (UserRepository, error) {
 }
 
 func (m *grpcMock) Authenticate(ctx context.Context, req *pb.UserAuthRequest) (*pb.UserAuthResponse, error) {
-	if ForceMockFail {
-		return nil, ErrForcedFailure
+	if forceMockFail {
+		return nil, errForcedFailure
 	}
 
 	return &pb.UserAuthResponse{
@@ -78,8 +75,8 @@ func (m *grpcMock) Authenticate(ctx context.Context, req *pb.UserAuthRequest) (*
 }
 
 func (m *grpcMock) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	if ForceMockFail {
-		return nil, ErrForcedFailure
+	if forceMockFail {
+		return nil, errForcedFailure
 	}
 
 	response := &pb.CreateUserResponse{
@@ -88,7 +85,7 @@ func (m *grpcMock) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 		Age:  "99",
 	}
 
-	if ForceBadAge {
+	if forceBadAge {
 		response.Age = "a"
 	}
 
@@ -96,8 +93,8 @@ func (m *grpcMock) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 }
 
 func (m *grpcMock) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	if ForceMockFail {
-		return nil, ErrForcedFailure
+	if forceMockFail {
+		return nil, errForcedFailure
 	}
 
 	response := &pb.GetUserResponse{
@@ -106,7 +103,7 @@ func (m *grpcMock) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.Get
 		Age:  "99",
 	}
 
-	if ForceBadAge {
+	if forceBadAge {
 		response.Age = "a"
 	}
 
@@ -114,8 +111,8 @@ func (m *grpcMock) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.Get
 }
 
 func (m *grpcMock) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
-	if ForceMockFail {
-		return nil, ErrForcedFailure
+	if forceMockFail {
+		return nil, errForcedFailure
 	}
 
 	response := &pb.UpdateUserResponse{
@@ -124,7 +121,7 @@ func (m *grpcMock) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 		Age:  "99",
 	}
 
-	if ForceBadAge {
+	if forceBadAge {
 		response.Age = "a"
 	}
 
@@ -132,8 +129,8 @@ func (m *grpcMock) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 }
 
 func (m *grpcMock) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
-	if ForceMockFail {
-		return nil, ErrForcedFailure
+	if forceMockFail {
+		return nil, errForcedFailure
 	}
 
 	return &pb.DeleteUserResponse{

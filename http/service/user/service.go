@@ -13,9 +13,9 @@ import (
 // Service is the user service
 type Service interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
-	CreateUser(ctx context.Context, user *shared.User) (*shared.User, error)
-	GetUser(ctx context.Context, userID string) (*shared.User, error)
-	UpdateUser(ctx context.Context, user *shared.User) (*shared.User, error)
+	CreateUser(ctx context.Context, user shared.User) (shared.User, error)
+	GetUser(ctx context.Context, userID string) (shared.User, error)
+	UpdateUser(ctx context.Context, user shared.User) (shared.User, error)
 	DeleteUser(ctx context.Context, userID string) (string, error)
 }
 
@@ -46,39 +46,39 @@ func (s *userService) Authenticate(ctx context.Context, name string, password st
 }
 
 //CreateUser is a method to create a user
-func (s *userService) CreateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
+func (s *userService) CreateUser(ctx context.Context, user shared.User) (shared.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	userCreated, err := s.repository.CreateUser(ctx, user)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return shared.User{}, err
 	}
 
 	return userCreated, nil
 }
 
 //GetUser is a method to get a user by id
-func (s *userService) GetUser(ctx context.Context, userID string) (*shared.User, error) {
+func (s *userService) GetUser(ctx context.Context, userID string) (shared.User, error) {
 	logger := log.With(s.logger, "method", "GetUser")
 
 	user, err := s.repository.GetUser(ctx, userID)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return shared.User{}, err
 	}
 
 	return user, nil
 }
 
-//Update is a method to update a user
-func (s *userService) UpdateUser(ctx context.Context, user *shared.User) (*shared.User, error) {
+//UpdateUser is a method to update a user
+func (s *userService) UpdateUser(ctx context.Context, user shared.User) (shared.User, error) {
 	logger := log.With(s.logger, "method", "UpdateUser")
 
 	userCreated, err := s.repository.UpdateUser(ctx, user)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return shared.User{}, err
 	}
 
 	return userCreated, nil

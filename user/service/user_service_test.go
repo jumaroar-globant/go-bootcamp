@@ -38,7 +38,7 @@ func TestAuthenticate(t *testing.T) {
 
 	row := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 
-	sqlString := regexp.QuoteMeta(`SELECT password_hash FROM users WHERE name=?`)
+	sqlString := regexp.QuoteMeta(repository.PasswordHashQuery)
 	mock.ExpectQuery(sqlString).WithArgs(username).WillReturnRows(row)
 
 	message, err := service.Authenticate(context.Background(), req)
@@ -62,7 +62,7 @@ func TestAuthenticateFails(t *testing.T) {
 		Password: "testPassword",
 	}
 
-	sqlString := regexp.QuoteMeta(`SELECT password_hash FROM users WHERE name=?`)
+	sqlString := regexp.QuoteMeta(repository.PasswordHashQuery)
 	mock.ExpectQuery(sqlString).WithArgs(username).WillReturnError(config.ErrMockFails)
 
 	message, err := service.Authenticate(context.Background(), req)
@@ -90,10 +90,10 @@ func TestCreateUser(t *testing.T) {
 	intAge, err := strconv.Atoi(user.Age)
 	c.NoError(err)
 
-	sqlString := regexp.QuoteMeta(`INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)`)
+	sqlString := regexp.QuoteMeta(repository.InsertUserStatement)
 	mock.ExpectExec(sqlString).WithArgs(sqlmock.AnyArg(), user.Name, sqlmock.AnyArg(), intAge, user.AdditionalInformation).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentSSQLString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
+	parentSSQLString := regexp.QuoteMeta(repository.InsertParentStatement)
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), user.Parent[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), user.Parent[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 
@@ -112,20 +112,20 @@ func TestCreateUserValidationsFails(t *testing.T) {
 	user := &pb.CreateUserRequest{}
 
 	savedUser, err := service.CreateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.Equal(ErrMissingUserName, err)
 
 	user.Name = "test"
 
 	savedUser, err = service.CreateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.Equal(ErrMissingPassword, err)
 
 	user.Password = "testPwd"
 	user.Age = "badAge"
 
 	savedUser, err = service.CreateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.IsType(&strconv.NumError{}, err)
 }
 
@@ -149,15 +149,15 @@ func TestCreateUserDatabaseFails(t *testing.T) {
 	intAge, err := strconv.Atoi(user.Age)
 	c.NoError(err)
 
-	sqlString := regexp.QuoteMeta(`INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)`)
+	sqlString := regexp.QuoteMeta(repository.InsertUserStatement)
 	mock.ExpectExec(sqlString).WithArgs(sqlmock.AnyArg(), user.Name, sqlmock.AnyArg(), intAge, user.AdditionalInformation).WillReturnError(config.ErrMockFails)
 
-	parentSSQLString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
+	parentSSQLString := regexp.QuoteMeta(repository.InsertParentStatement)
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), user.Parent[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), user.Parent[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	savedUser, err := service.CreateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.Equal(config.ErrMockFails, err)
 }
 
@@ -181,26 +181,26 @@ func TestUpdateUser(t *testing.T) {
 	intAge, err := strconv.Atoi(user.Age)
 	c.NoError(err)
 
-	sqlUpdateString := regexp.QuoteMeta(`UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?`)
+	sqlUpdateString := regexp.QuoteMeta(repository.UpdateUserStatement)
 
 	mock.ExpectExec(sqlUpdateString).WithArgs(user.Name, intAge, user.AdditionalInformation, user.Id).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	sqlDeleteString := regexp.QuoteMeta(`DELETE FROM user_parents WHERE user_id=?`)
+	sqlDeleteString := regexp.QuoteMeta(repository.DeleteUserParentsStatement)
 
 	mock.ExpectExec(sqlDeleteString).WithArgs(user.Id).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentsSQLInsertString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
+	parentsSQLInsertString := regexp.QuoteMeta(repository.InsertParentStatement)
 
 	mock.ExpectExec(parentsSQLInsertString).WithArgs(user.Id, user.Parent[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentsSQLInsertString).WithArgs(user.Id, user.Parent[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	row := sqlmock.NewRows([]string{"id", "name", "age", "additional_information"}).AddRow(user.Id, user.Name, user.Age, user.AdditionalInformation)
 
-	sqlSelectString := regexp.QuoteMeta(`SELECT id, name, age, additional_information FROM users WHERE id=?`)
+	sqlSelectString := regexp.QuoteMeta(repository.UserDataQuery)
 
 	mock.ExpectQuery(sqlSelectString).WithArgs(user.Id).WillReturnRows(row)
 
-	parentSSQLString := regexp.QuoteMeta(`SELECT name FROM user_parents WHERE user_id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.UserParentsQuery)
 
 	rows := sqlmock.NewRows([]string{"name"}).AddRow(user.Parent[0]).AddRow(user.Parent[1])
 
@@ -221,7 +221,7 @@ func TestUpdateUserValidationsFails(t *testing.T) {
 	user := &pb.UpdateUserRequest{}
 
 	savedUser, err := service.UpdateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.Equal(ErrMissingUserID, err)
 
 	user.Id = "USR123"
@@ -229,7 +229,7 @@ func TestUpdateUserValidationsFails(t *testing.T) {
 	user.Age = "badAge"
 
 	savedUser, err = service.UpdateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.IsType(&strconv.NumError{}, err)
 }
 
@@ -253,12 +253,12 @@ func TestUpdateUserDbFails(t *testing.T) {
 	intAge, err := strconv.Atoi(user.Age)
 	c.NoError(err)
 
-	sqlUpdateString := regexp.QuoteMeta(`UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?`)
+	sqlUpdateString := regexp.QuoteMeta(repository.UpdateUserStatement)
 
 	mock.ExpectExec(sqlUpdateString).WithArgs(user.Name, intAge, user.AdditionalInformation, user.Id).WillReturnError(config.ErrMockFails)
 
 	savedUser, err := service.UpdateUser(context.Background(), user)
-	c.Nil(savedUser)
+	c.Empty(savedUser)
 	c.IsType(config.ErrMockFails, err)
 }
 
@@ -275,7 +275,7 @@ func TestGetUser(t *testing.T) {
 		Id: "USR123",
 	}
 
-	user := &sharedLib.User{
+	user := sharedLib.User{
 		ID:                    "USR123",
 		Name:                  "test",
 		Age:                   99,
@@ -285,10 +285,10 @@ func TestGetUser(t *testing.T) {
 
 	row := sqlmock.NewRows([]string{"id", "name", "age", "additional_information"}).AddRow(user.ID, user.Name, user.Age, user.AdditionalInformation)
 
-	sqlString := regexp.QuoteMeta(`SELECT id, name, age, additional_information FROM users WHERE id=?`)
+	sqlString := regexp.QuoteMeta(repository.UserDataQuery)
 	mock.ExpectQuery(sqlString).WithArgs(req.Id).WillReturnRows(row)
 
-	parentSSQLString := regexp.QuoteMeta(`SELECT name FROM user_parents WHERE user_id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.UserParentsQuery)
 
 	rows := sqlmock.NewRows([]string{"name"}).AddRow(user.Parents[0]).AddRow(user.Parents[1])
 
@@ -312,17 +312,17 @@ func TestGetUserFails(t *testing.T) {
 		Id: "USR123",
 	}
 
-	sqlString := regexp.QuoteMeta(`SELECT id, name, age, additional_information FROM users WHERE id=?`)
+	sqlString := regexp.QuoteMeta(repository.UserDataQuery)
 	mock.ExpectQuery(sqlString).WithArgs(req.Id).WillReturnError(config.ErrMockFails)
 
 	foundUser, err := service.GetUser(context.Background(), req)
-	c.Nil(foundUser)
+	c.Empty(foundUser)
 	c.Equal(config.ErrMockFails, err)
 
 	req.Id = ""
 
 	foundUser, err = service.GetUser(context.Background(), req)
-	c.Nil(foundUser)
+	c.Empty(foundUser)
 	c.Equal(ErrMissingUserID, err)
 }
 
@@ -339,10 +339,10 @@ func TestDeleteUser(t *testing.T) {
 		Id: "USR123",
 	}
 
-	sqlString := regexp.QuoteMeta(`DELETE FROM user_parents WHERE user_id=?`)
+	sqlString := regexp.QuoteMeta(repository.DeleteUserParentsStatement)
 	mock.ExpectExec(sqlString).WithArgs("USR123").WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentSSQLString := regexp.QuoteMeta(`DELETE FROM users WHERE id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.DeleteUserStatement)
 	mock.ExpectExec(parentSSQLString).WithArgs("USR123").WillReturnResult(sqlmock.NewResult(0, 1))
 
 	message, err := service.DeleteUser(context.Background(), req)
@@ -363,7 +363,7 @@ func TestDeleteUserFails(t *testing.T) {
 		Id: "USR123",
 	}
 
-	sqlString := regexp.QuoteMeta(`DELETE FROM user_parents WHERE user_id=?`)
+	sqlString := regexp.QuoteMeta(repository.DeleteUserParentsStatement)
 	mock.ExpectExec(sqlString).WithArgs("USR123").WillReturnError(config.ErrMockFails)
 
 	message, err := service.DeleteUser(context.Background(), req)

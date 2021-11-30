@@ -3,6 +3,7 @@ package userrepository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/go-kit/log"
@@ -27,9 +28,9 @@ type userRepository struct {
 // UserRepository is the user repository
 type UserRepository interface {
 	Authenticate(ctx context.Context, username string, password string) (string, error)
-	CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
-	GetUser(ctx context.Context, userID string) (*sharedLib.User, error)
-	UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error)
+	CreateUser(ctx context.Context, user sharedLib.User) (sharedLib.User, error)
+	GetUser(ctx context.Context, userID string) (sharedLib.User, error)
+	UpdateUser(ctx context.Context, user sharedLib.User) (sharedLib.User, error)
 	DeleteUser(ctx context.Context, userID string) (string, error)
 }
 
@@ -60,7 +61,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pwdH
 }
 
 // CreateUser is the userRepository user creation method
-func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
+func (r *userRepository) CreateUser(ctx context.Context, user sharedLib.User) (sharedLib.User, error) {
 	logger := log.With(r.logger, "method", "CreateUser")
 
 	request := &pb.CreateUserRequest{
@@ -74,16 +75,18 @@ func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (
 	reply, err := r.client.CreateUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return sharedLib.User{}, err
 	}
+
+	fmt.Println(reply.Age)
 
 	intAge, err := strconv.Atoi(reply.Age)
 	if err != nil {
 		level.Error(logger).Log("err", ErrBadAge)
-		return nil, ErrBadAge
+		return sharedLib.User{}, ErrBadAge
 	}
 
-	return &sharedLib.User{
+	return sharedLib.User{
 		ID:                    reply.Id,
 		Name:                  reply.Name,
 		Age:                   intAge,
@@ -93,7 +96,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (
 }
 
 // GetUser is the userRepository method to retrieve an user by id
-func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib.User, error) {
+func (r *userRepository) GetUser(ctx context.Context, userID string) (sharedLib.User, error) {
 	logger := log.With(r.logger, "method", "GetUser")
 
 	request := &pb.GetUserRequest{
@@ -103,16 +106,16 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 	reply, err := r.client.GetUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	intAge, err := strconv.Atoi(reply.Age)
 	if err != nil {
 		level.Error(logger).Log("err", ErrBadAge)
-		return nil, ErrBadAge
+		return sharedLib.User{}, ErrBadAge
 	}
 
-	return &sharedLib.User{
+	return sharedLib.User{
 		ID:                    reply.Id,
 		Name:                  reply.Name,
 		Age:                   intAge,
@@ -122,7 +125,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 }
 
 // UpdateUser is the userRepository method to update an user
-func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (*sharedLib.User, error) {
+func (r *userRepository) UpdateUser(ctx context.Context, user sharedLib.User) (sharedLib.User, error) {
 	logger := log.With(r.logger, "method", "UpdateUser")
 
 	request := &pb.UpdateUserRequest{
@@ -136,16 +139,16 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (
 	reply, err := r.client.UpdateUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return sharedLib.User{}, err
 	}
 
 	intAge, err := strconv.Atoi(reply.Age)
 	if err != nil {
 		level.Error(logger).Log("err", ErrBadAge)
-		return nil, ErrBadAge
+		return sharedLib.User{}, ErrBadAge
 	}
 
-	return &sharedLib.User{
+	return sharedLib.User{
 		ID:                    reply.Id,
 		Name:                  reply.Name,
 		Age:                   intAge,

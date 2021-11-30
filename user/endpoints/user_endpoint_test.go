@@ -42,17 +42,20 @@ func TestMakeCreateUserEndpoint(t *testing.T) {
 	intAge, err := strconv.Atoi(req.Age)
 	c.NoError(err)
 
-	sqlString := regexp.QuoteMeta(`INSERT INTO users (id, name, password_hash, age, additional_information) VALUES(?, ?, ?, ?, ?)`)
+	sqlString := regexp.QuoteMeta(repository.InsertUserStatement)
 	mock.ExpectExec(sqlString).WithArgs(sqlmock.AnyArg(), req.Name, sqlmock.AnyArg(), intAge, req.AdditionalInformation).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentSSQLString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
+	parentSSQLString := regexp.QuoteMeta(repository.InsertParentStatement)
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), req.Parent[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentSSQLString).WithArgs(sqlmock.AnyArg(), req.Parent[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	result, err := createUserEndpoint(context.Background(), req)
 
-	c.Equal(req.Name, result.(*shared.User).Name)
+	c.Equal(req.Name, result.(shared.User).Name)
 	c.NoError(err)
+
+	_, err = createUserEndpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
 }
 
 func TestMakeAuthenticateEndpoint(t *testing.T) {
@@ -78,13 +81,16 @@ func TestMakeAuthenticateEndpoint(t *testing.T) {
 
 	row := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 
-	sqlString := regexp.QuoteMeta(`SELECT password_hash FROM users WHERE name=?`)
+	sqlString := regexp.QuoteMeta(repository.PasswordHashQuery)
 	mock.ExpectQuery(sqlString).WithArgs(username).WillReturnRows(row)
 
 	result, err := authenticatendpoint(context.Background(), req)
 
 	c.Equal("User authenticated!", result.(string))
 	c.NoError(err)
+
+	_, err = authenticatendpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
 }
 
 func TestMakeGetUserEndpoint(t *testing.T) {
@@ -102,7 +108,7 @@ func TestMakeGetUserEndpoint(t *testing.T) {
 		Id: "USR123",
 	}
 
-	user := &shared.User{
+	user := shared.User{
 		ID:                    "USR123",
 		Name:                  "test",
 		Age:                   99,
@@ -112,10 +118,10 @@ func TestMakeGetUserEndpoint(t *testing.T) {
 
 	row := sqlmock.NewRows([]string{"id", "name", "age", "additional_information"}).AddRow(user.ID, user.Name, user.Age, user.AdditionalInformation)
 
-	sqlString := regexp.QuoteMeta(`SELECT id, name, age, additional_information FROM users WHERE id=?`)
+	sqlString := regexp.QuoteMeta(repository.UserDataQuery)
 	mock.ExpectQuery(sqlString).WithArgs(req.Id).WillReturnRows(row)
 
-	parentSSQLString := regexp.QuoteMeta(`SELECT name FROM user_parents WHERE user_id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.UserParentsQuery)
 
 	rows := sqlmock.NewRows([]string{"name"}).AddRow(user.Parents[0]).AddRow(user.Parents[1])
 
@@ -123,8 +129,11 @@ func TestMakeGetUserEndpoint(t *testing.T) {
 
 	result, err := getuserendpoint(context.Background(), req)
 
-	c.Equal(user, result.(*shared.User))
+	c.Equal(user, result.(shared.User))
 	c.NoError(err)
+
+	_, err = getuserendpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
 }
 
 func TestMakeUpdateUserEndpoint(t *testing.T) {
@@ -149,26 +158,26 @@ func TestMakeUpdateUserEndpoint(t *testing.T) {
 	intAge, err := strconv.Atoi(user.Age)
 	c.NoError(err)
 
-	sqlUpdateString := regexp.QuoteMeta(`UPDATE users SET name=?, age=?, additional_information=?  WHERE id = ?`)
+	sqlUpdateString := regexp.QuoteMeta(repository.UpdateUserStatement)
 
 	mock.ExpectExec(sqlUpdateString).WithArgs(user.Name, intAge, user.AdditionalInformation, user.Id).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	sqlDeleteString := regexp.QuoteMeta(`DELETE FROM user_parents WHERE user_id=?`)
+	sqlDeleteString := regexp.QuoteMeta(repository.DeleteUserParentsStatement)
 
 	mock.ExpectExec(sqlDeleteString).WithArgs(user.Id).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentsSQLInsertString := regexp.QuoteMeta(`INSERT INTO user_parents (user_id, name) VALUES(?, ?)`)
+	parentsSQLInsertString := regexp.QuoteMeta(repository.InsertParentStatement)
 
 	mock.ExpectExec(parentsSQLInsertString).WithArgs(user.Id, user.Parent[0]).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(parentsSQLInsertString).WithArgs(user.Id, user.Parent[1]).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	row := sqlmock.NewRows([]string{"id", "name", "age", "additional_information"}).AddRow(user.Id, user.Name, user.Age, user.AdditionalInformation)
 
-	sqlSelectString := regexp.QuoteMeta(`SELECT id, name, age, additional_information FROM users WHERE id=?`)
+	sqlSelectString := regexp.QuoteMeta(repository.UserDataQuery)
 
 	mock.ExpectQuery(sqlSelectString).WithArgs(user.Id).WillReturnRows(row)
 
-	parentSSQLString := regexp.QuoteMeta(`SELECT name FROM user_parents WHERE user_id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.UserParentsQuery)
 
 	rows := sqlmock.NewRows([]string{"name"}).AddRow(user.Parent[0]).AddRow(user.Parent[1])
 
@@ -176,8 +185,11 @@ func TestMakeUpdateUserEndpoint(t *testing.T) {
 
 	result, err := updateendpoint(context.Background(), user)
 
-	c.Equal(user.Name, result.(*shared.User).Name)
+	c.Equal(user.Name, result.(shared.User).Name)
 	c.NoError(err)
+
+	_, err = updateendpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
 }
 
 func TestMakeDeleteEndpoint(t *testing.T) {
@@ -195,16 +207,19 @@ func TestMakeDeleteEndpoint(t *testing.T) {
 		Id: "USR123",
 	}
 
-	sqlString := regexp.QuoteMeta(`DELETE FROM user_parents WHERE user_id=?`)
+	sqlString := regexp.QuoteMeta(repository.DeleteUserParentsStatement)
 	mock.ExpectExec(sqlString).WithArgs("USR123").WillReturnResult(sqlmock.NewResult(0, 1))
 
-	parentSSQLString := regexp.QuoteMeta(`DELETE FROM users WHERE id=?`)
+	parentSSQLString := regexp.QuoteMeta(repository.DeleteUserStatement)
 	mock.ExpectExec(parentSSQLString).WithArgs("USR123").WillReturnResult(sqlmock.NewResult(0, 1))
 
 	result, err := deletendpoint(context.Background(), req)
 
 	c.Equal("user deleted successfully", result.(string))
 	c.NoError(err)
+
+	_, err = deletendpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
 }
 
 func TestMakeEndpoints(t *testing.T) {
@@ -231,7 +246,7 @@ func TestMakeEndpoints(t *testing.T) {
 
 	row := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 
-	sqlString := regexp.QuoteMeta(`SELECT password_hash FROM users WHERE name=?`)
+	sqlString := regexp.QuoteMeta(repository.PasswordHashQuery)
 	mock.ExpectQuery(sqlString).WithArgs(username).WillReturnRows(row)
 
 	result, err := endpoints.Authenticate(context.Background(), req)

@@ -28,6 +28,18 @@ func TestMakeAuthenticateEndpoint(t *testing.T) {
 	result, err := endpoint(context.Background(), AuthenticationRequest{"test", "test"})
 	c.NoError(err)
 	c.Equal("User Authenticated!", result.(AuthenticationResponse).Message)
+
+	_, err = endpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
+
+	forceMockFail = true
+
+	defer func() {
+		forceMockFail = false
+	}()
+
+	_, err = endpoint(context.Background(), AuthenticationRequest{"test", "test"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestMakeCreateUserEndpoint(t *testing.T) {
@@ -39,7 +51,19 @@ func TestMakeCreateUserEndpoint(t *testing.T) {
 
 	result, err := endpoint(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
-	c.Equal("test", result.(*shared.User).Name)
+	c.Equal("test", result.(shared.User).Name)
+
+	_, err = endpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
+
+	forceMockFail = true
+
+	defer func() {
+		forceMockFail = false
+	}()
+
+	_, err = endpoint(context.Background(), shared.User{Name: "test"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestMakeGetUserEndpoint(t *testing.T) {
@@ -51,7 +75,19 @@ func TestMakeGetUserEndpoint(t *testing.T) {
 
 	result, err := endpoint(context.Background(), GetUserRequest{UserID: "USR123"})
 	c.NoError(err)
-	c.Equal("", result.(*shared.User).Name)
+	c.Equal("", result.(shared.User).Name)
+
+	_, err = endpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
+
+	forceMockFail = true
+
+	defer func() {
+		forceMockFail = false
+	}()
+
+	_, err = endpoint(context.Background(), GetUserRequest{UserID: "USR123"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestMakeUpdateUserEndpoint(t *testing.T) {
@@ -63,7 +99,19 @@ func TestMakeUpdateUserEndpoint(t *testing.T) {
 
 	result, err := endpoint(context.Background(), shared.User{Name: "test"})
 	c.NoError(err)
-	c.Equal("test", result.(*shared.User).Name)
+	c.Equal("test", result.(shared.User).Name)
+
+	_, err = endpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
+
+	forceMockFail = true
+
+	defer func() {
+		forceMockFail = false
+	}()
+
+	_, err = endpoint(context.Background(), shared.User{Name: "test"})
+	c.Equal(errForcedFailure, err)
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
@@ -76,4 +124,16 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 	result, err := endpoint(context.Background(), DeleteUserRequest{UserID: "USR123"})
 	c.NoError(err)
 	c.Equal("user deleted successfully", result.(DeleteUserResponse).Message)
+
+	_, err = endpoint(context.Background(), "bad request")
+	c.Equal(errBadRequest, err)
+
+	forceMockFail = true
+
+	defer func() {
+		forceMockFail = false
+	}()
+
+	_, err = endpoint(context.Background(), DeleteUserRequest{UserID: "USR123"})
+	c.Equal(errForcedFailure, err)
 }
