@@ -38,7 +38,7 @@ func main() {
 
 	errs := make(chan error)
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
 		errs <- fmt.Errorf("%s", <-c)
 	}()

@@ -20,7 +20,7 @@ var (
 )
 
 type userRepository struct {
-	conn   *grpc.ClientConn
+	client pb.UserServiceClient
 	logger log.Logger
 }
 
@@ -36,7 +36,7 @@ type UserRepository interface {
 // NewUserRepository is the UserRepository constructor
 func NewUserRepository(conn *grpc.ClientConn, logger log.Logger) UserRepository {
 	return &userRepository{
-		conn:   conn,
+		client: pb.NewUserServiceClient(conn),
 		logger: log.With(logger, "error", "grpc"),
 	}
 }
@@ -50,9 +50,7 @@ func (r *userRepository) Authenticate(ctx context.Context, username string, pwdH
 		Password: pwdHash,
 	}
 
-	client := pb.NewUserServiceClient(r.conn)
-
-	reply, err := client.Authenticate(ctx, request)
+	reply, err := r.client.Authenticate(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return "", err
@@ -73,9 +71,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *sharedLib.User) (
 		Parent:                user.Parents,
 	}
 
-	client := pb.NewUserServiceClient(r.conn)
-
-	reply, err := client.CreateUser(ctx, request)
+	reply, err := r.client.CreateUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return nil, err
@@ -104,9 +100,7 @@ func (r *userRepository) GetUser(ctx context.Context, userID string) (*sharedLib
 		Id: userID,
 	}
 
-	client := pb.NewUserServiceClient(r.conn)
-
-	reply, err := client.GetUser(ctx, request)
+	reply, err := r.client.GetUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return nil, err
@@ -139,9 +133,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *sharedLib.User) (
 		Parent:                user.Parents,
 	}
 
-	client := pb.NewUserServiceClient(r.conn)
-
-	reply, err := client.UpdateUser(ctx, request)
+	reply, err := r.client.UpdateUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return nil, err
@@ -170,9 +162,7 @@ func (r *userRepository) DeleteUser(ctx context.Context, userID string) (string,
 		Id: userID,
 	}
 
-	client := pb.NewUserServiceClient(r.conn)
-
-	reply, err := client.DeleteUser(ctx, request)
+	reply, err := r.client.DeleteUser(ctx, request)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return "", err
