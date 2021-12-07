@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net"
 	"os"
@@ -14,10 +15,36 @@ import (
 	"github.com/jumaroar-globant/go-bootcamp/user/pb"
 	"github.com/jumaroar-globant/go-bootcamp/user/repository"
 	"github.com/jumaroar-globant/go-bootcamp/user/service"
+	"github.com/jumaroar-globant/go-bootcamp/user/shared"
 
 	transport "github.com/jumaroar-globant/go-bootcamp/user/transports"
 	"google.golang.org/grpc"
 )
+
+var (
+	dbDriver = shared.GetStringEnvVar("MICROSERVICE_DATABASE_DRIVER", "mongo")
+)
+
+func initDatabase() (interface{}, error) {
+	if dbDriver == "mongo" {
+		return config.ConnectToMongoDB()
+	}
+
+	return config.Connect()
+}
+
+func initRepository(logger log.Logger) (repository.UserRepository, error) {
+	db, err := initDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	if dbDriver == "mongo" {
+		return repository.NewMongoUserRepository(db.(config.MongoDatabaseHelper), logger), nil
+	}
+
+	return repository.NewUserRepository(db.(*sql.DB), logger), nil
+}
 
 func main() {
 	var logger log.Logger
@@ -25,13 +52,12 @@ func main() {
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	db, err := config.Connect()
+	userRepository, err := initRepository(logger)
 	if err != nil {
 		level.Error(logger).Log("error_connecting_to_database", err)
 		return
 	}
 
-	userRepository := repository.NewUserRepository(db, logger)
 	userService := service.NewUserService(userRepository, logger)
 	userEndpoints := endpoints.MakeEndpoints(userService)
 	grpcServer := transport.NewGRPCServer(userEndpoints, logger)
