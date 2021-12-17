@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	dbDriver = shared.GetStringEnvVar("MICROSERVICE_DATABASE_DRIVER", "mongo")
+	dbDriver = shared.GetStringEnvVar("MICROSERVICE_DATABASE_DRIVER", "mysql")
 )
 
 func initDatabase() (interface{}, error) {

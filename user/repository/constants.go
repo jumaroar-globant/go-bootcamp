@@ -17,4 +17,6 @@ const (
 	UserParentsQuery string = "SELECT name FROM user_parents WHERE user_id=?"
 	//DeleteUserStatement is a SQL statement to delete a user
 	DeleteUserStatement string = "DELETE FROM users WHERE id=?"
+
+	usernameKey = "users.users_UN"
 )

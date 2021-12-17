@@ -81,7 +81,9 @@ func makeCreateUserEndpoint(s userservice.Service) endpoint.Endpoint {
 			return nil, errBadRequest
 		}
 
-		return s.CreateUser(ctx, req)
+		resp, err := s.CreateUser(ctx, req)
+
+		return resp, err
 	}
 }
 

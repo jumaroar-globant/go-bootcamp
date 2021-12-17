@@ -13,6 +13,7 @@ import (
 
 	userendpoints "github.com/jumaroar-globant/go-bootcamp/http/endpoints/user"
 	"github.com/jumaroar-globant/go-bootcamp/shared"
+	middleware "github.com/jumaroar-globant/go-bootcamp/shared/middleware/errs"
 )
 
 var (
@@ -24,11 +25,16 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 	r := mux.NewRouter()
 	r.Use(commonMiddleware)
 
+	opts := []httptransport.ServerOption{
+		httptransport.ServerErrorEncoder(middleware.MakeHTTPErrorEncoder(logger)),
+	}
+
 	r.Methods("POST").Path("/user/auth").Handler(
 		httptransport.NewServer(
 			usrEndpoints.Authenticate,
 			decodeAuthRequest,
 			encodeAuthResponse,
+			opts...,
 		),
 	)
 
@@ -37,6 +43,7 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.CreateUser,
 			decodeCreateUserRequest,
 			encodeCreateUserResponse,
+			opts...,
 		),
 	)
 
@@ -45,6 +52,7 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.GetUser,
 			decodeGetUserRequest,
 			encodeGetUserResponse,
+			opts...,
 		),
 	)
 
@@ -53,6 +61,7 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.UpdateUser,
 			decodeUpdateUserRequest,
 			encodeUpdateUserResponse,
+			opts...,
 		),
 	)
 
@@ -61,6 +70,7 @@ func NewHTTPServer(usrEndpoints *userendpoints.UserEndpoints, logger log.Logger)
 			usrEndpoints.DeleteUser,
 			decodeDeleteUserRequest,
 			encodeDeleteUserResponse,
+			opts...,
 		),
 	)
 
